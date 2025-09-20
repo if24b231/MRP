@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Controller {
-    String path() default "/";
+    String path() default "/api";
     Method method() default Method.GET;
 }

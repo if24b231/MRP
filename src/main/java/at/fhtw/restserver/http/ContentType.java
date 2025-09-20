@@ -1,9 +1,12 @@
 package at.fhtw.restserver.http;
 
 public enum ContentType {
+    PLAIN_TEXT("text/plain"),
+    HTML("text/html"),
     JSON("application/json");
 
-    public final String value;
 
-    ContentType(String value) {this.value = value;}
+    public final String type;
+
+    ContentType(String type) {this.type = type;}
 }
