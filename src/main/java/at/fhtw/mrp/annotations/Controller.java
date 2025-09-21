@@ -1,4 +1,4 @@
-package at.fhtw.mrp.controller;
+package at.fhtw.mrp.annotations;
 
 import at.fhtw.restserver.http.Method;
 
@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Controller {
-    String path() default "/api";
+    String path();
     Method method() default Method.GET;
+    boolean authenticationNeeded() default true;
 }
