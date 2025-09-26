@@ -8,7 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AuthRepository {
+public class AuthRepository implements AutoCloseable {
     private UnitOfWork unitOfWork;
     private PasswordHashManager passwordHashManager;
 
@@ -17,12 +17,13 @@ public class AuthRepository {
     }
 
     public Boolean createUser(UserCreationDto user) throws SQLException {
-        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("INSERT INTO users (username, password) VALUES (?)")) {
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement(
+                "INSERT INTO \"user\" (username, password) VALUES (?, ?)")) {
             preparedStatement.setString(1, user.getUsername());
             preparedStatement.setString(2, user.getPassword());
 
-            Integer result = preparedStatement.executeUpdate();
-            if (result >= 1) {
+            int result = preparedStatement.executeUpdate();
+            if (result == 1) {
                 unitOfWork.commitTransaction();
                 unitOfWork.finishWork();
                 return true;
@@ -30,5 +31,10 @@ public class AuthRepository {
 
             return false;
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+
     }
 }

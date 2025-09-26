@@ -1,23 +1,21 @@
 package at.fhtw.mrp.utils.deserializer;
 
 import at.fhtw.mrp.model.UserCreationDto;
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.node.IntNode;
 
 import java.io.IOException;
 
-public class UserCreationDeserializer extends StdDeserializer<UserCreationDto> {
+public class UserCreationDtoDeserializer extends StdDeserializer<UserCreationDto> {
 
-    public UserCreationDeserializer() {
+    public UserCreationDtoDeserializer() {
         this(null);
     }
 
-    public UserCreationDeserializer(Class<?> vc) {
+    public UserCreationDtoDeserializer(Class<?> vc) {
         super(vc);
     }
 

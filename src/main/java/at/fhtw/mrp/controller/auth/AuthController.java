@@ -1,5 +1,7 @@
 package at.fhtw.mrp.controller.auth;
 
+import at.fhtw.Logging.LogType;
+import at.fhtw.Logging.Logger;
 import at.fhtw.mrp.annotations.Controller;
 import at.fhtw.mrp.dal.UnitOfWork;
 import at.fhtw.mrp.dal.repository.AuthRepository;
@@ -17,29 +19,24 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 
 public class AuthController {
-    private AuthRepository authRepository;
-
-    public AuthController() {
-        this.authRepository = new AuthRepository(new UnitOfWork());
-    }
-
     @Controller(path = "/api/users/register", method = Method.POST, authenticationNeeded = false)
-    public void register(Request request) {
+    public static void register(Request request) {
         String body = request.getBody();
         if (body == null || body.isEmpty()) {
-            new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"Body should not be empty.\"}");
+            new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"Body should not be empty.\"}").send(request.getExchange());
+            return;
         }
 
-        try {
+        try(AuthRepository authRepository = new AuthRepository(new UnitOfWork())) {
             UserCreationDto userCreationDto = new ObjectMapper().readValue(body, UserCreationDto.class);
             userCreationDto.hashPassword();
 
-            if (this.authRepository.createUser(userCreationDto)) {
+            if (authRepository.createUser(userCreationDto)) {
                 new Response(HttpStatus.CREATED, ContentType.JSON, "User registered").send(request.getExchange());
-                return;
             }
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException | SQLException | JsonProcessingException e) {
-            new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"message\": \"Failed to register user.\"}");
+        } catch (Exception e) {
+            Logger.log(LogType.ERROR, "Failed to register user: " + e.getLocalizedMessage());
+            new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"message\": \"Failed to register user.\"}").send(request.getExchange());
         }
     }
 

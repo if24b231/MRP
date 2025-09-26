@@ -1,7 +1,7 @@
 package at.fhtw.mrp.model;
 
 import at.fhtw.mrp.utils.PasswordHashManager;
-import at.fhtw.mrp.utils.deserializer.UserCreationDeserializer;
+import at.fhtw.mrp.utils.deserializer.UserCreationDtoDeserializer;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-@JsonDeserialize(using = UserCreationDeserializer.class)
+@JsonDeserialize(using = UserCreationDtoDeserializer.class)
 public class UserCreationDto {
     @JsonAlias({"username"})
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)

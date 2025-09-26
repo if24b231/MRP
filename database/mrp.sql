@@ -1,4 +1,3 @@
-\c postgres
 --Deletion of old database--
 DROP DATABASE IF EXISTS "MediaRatingPlatform";
 DROP OWNED BY mrp;
@@ -16,6 +15,8 @@ $$
 CREATE DATABASE "MediaRatingPlatform" owner mrp;
 \c "MediaRatingPlatform"
 Alter schema public owner TO mrp;
+
+SET ROLE mrp;
 
 create table "user"
 (

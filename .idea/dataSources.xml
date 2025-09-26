@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="postgres@docker" uuid="5a3ccffa-105b-4646-a5d9-a24c6bafe178">
+    <data-source source="LOCAL" name="MediaRatingPlatform@docker" uuid="1b35426e-ddf8-4f02-b8e3-2866322fd8aa">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
