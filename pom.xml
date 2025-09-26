@@ -46,5 +46,4 @@
             <version>${jwt.version}</version>
         </dependency>
     </dependencies>
-
 </project>

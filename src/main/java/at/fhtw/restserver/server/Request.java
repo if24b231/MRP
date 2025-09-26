@@ -37,6 +37,10 @@ public class Request implements com.sun.net.httpserver.Request {
         return exchange.getRequestHeaders();
     }
 
+    public String getBody() {
+        return body;
+    }
+
     public HttpExchange getExchange() {
         return exchange;
     }

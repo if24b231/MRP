@@ -11,9 +11,9 @@ public enum DatabaseManager {
     {
         try {
             return DriverManager.getConnection(
-                    "jdbc:postgresql://localhost:5432/",
-                    "",
-                    "");
+                    "jdbc:postgresql://localhost:5432/MediaRatingPlatform",
+                    "mrp",
+                    "mrp");
         } catch (SQLException e) {
             throw new DataAccessException("Database connection could not be established", e);
         }

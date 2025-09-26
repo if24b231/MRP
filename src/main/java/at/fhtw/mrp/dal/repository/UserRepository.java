@@ -2,7 +2,7 @@ package at.fhtw.mrp.dal.repository;
 
 import at.fhtw.mrp.dal.DataAccessException;
 import at.fhtw.mrp.dal.UnitOfWork;
-import at.fhtw.mrp.entity.User;
+import at.fhtw.mrp.dal.entity.User;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,6 +29,7 @@ public class UserRepository {
             while (resultSet.next()) {
                 users.add(
                         new User(
+                                resultSet.getInt("userId"),
                                 resultSet.getString("username"),
                                 resultSet.getString("password"))
                 );

@@ -1,20 +1,17 @@
-package at.fhtw.mrp.entity;
-
-import com.fasterxml.jackson.annotation.JsonAlias;
+package at.fhtw.mrp.dal.entity;
 
 public class User {
-    @JsonAlias({"id"})
+    private final Integer userId;
     private String username;
-    @JsonAlias({"password"})
     private String password;
 
-    public User() {}
-
-    public User(String username, String password) {
+    public User(Integer userId, String username, String password) {
+        this.userId = userId;
         this.username = username;
         this.password = password;
     }
 
+    public Integer getUserId() { return userId; }
     public String getUsername() {
         return username;
     }
@@ -24,7 +21,6 @@ public class User {
     public String getPassword() {
         return password;
     }
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public void setPassword(String password) { this.password = password; }
 }
+
