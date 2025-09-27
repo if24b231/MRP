@@ -6,7 +6,8 @@ import at.fhtw.mrp.annotations.Controller;
 import at.fhtw.mrp.service.RestService;
 import at.fhtw.mrp.utils.ControllerProcessor;
 import at.fhtw.mrp.utils.Mapping;
-import at.fhtw.restserver.server.session.SessionManager;
+import at.fhtw.restserver.server.tokenManagement.TokenManager;
+import at.fhtw.restserver.server.tokenManagement.TokenStore;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ import java.util.function.Consumer;
 
 public class Server {
     public static final Map<Mapping, Consumer<Request>> controllers = new HashMap<>();
-    public static SessionManager sessionManager = new SessionManager();
+    public static TokenManager tokenManager = new TokenManager(new TokenStore());
 
     public void start(Integer port) throws IOException {
         try {

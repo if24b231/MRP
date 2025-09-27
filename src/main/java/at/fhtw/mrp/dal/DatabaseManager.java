@@ -1,5 +1,7 @@
 package at.fhtw.mrp.dal;
 
+import at.fhtw.mrp.dal.exceptions.DataAccessException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

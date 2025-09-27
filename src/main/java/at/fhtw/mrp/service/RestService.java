@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static at.fhtw.restserver.server.Server.sessionManager;
+import static at.fhtw.restserver.server.Server.tokenManager;
 
 public class RestService implements HttpHandler {
     String restPattern = ":([A-Za-z0-9]+)";
@@ -34,7 +34,7 @@ public class RestService implements HttpHandler {
                             entry.getKey().methodType().toString().equalsIgnoreCase(method) && matchesPath(entry.getKey().path(), path))
                     .map(entry -> {
                         if (entry.getKey().authenticationNeeded()) {
-                            if (!sessionManager.isValid(String.valueOf(exchange.getRequestHeaders().get("securityToken")))) {
+                            if (!tokenManager.isVarified(exchange.getRequestHeaders().getFirst("Authorization"))) {
                                 new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"message\": \"Unauthorized\"}").send(exchange);
                                 return -1;
                             }

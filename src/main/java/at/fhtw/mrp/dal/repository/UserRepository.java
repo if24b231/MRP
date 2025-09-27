@@ -1,6 +1,6 @@
 package at.fhtw.mrp.dal.repository;
 
-import at.fhtw.mrp.dal.DataAccessException;
+import at.fhtw.mrp.dal.exceptions.DataAccessException;
 import at.fhtw.mrp.dal.UnitOfWork;
 import at.fhtw.mrp.dal.entity.User;
 
