@@ -27,22 +27,6 @@ create table "user"
     password varchar     not null
 );
 
-create table "mediaType"
-(
-    "mediaTypeId" serial not null,
-    "type" varchar(50) not null,
-    constraint "mediaType_pk"
-        primary key ("mediaTypeId")
-);
-
-create table "ageRestriction"
-(
-    "ageRestrictionId" integer not null,
-    "name" varchar(50) not null,
-    constraint "ageRestriction_pk"
-        primary key ("ageRestrictionId")
-);
-
 create table genre
 (
     "genreId" serial not null
@@ -61,11 +45,9 @@ create table media
     description varchar(255) not null,
     "releaseYear" integer not null,
     "averageScore" decimal(1,2) not null,
-    "mediaTypeId" integer not null,
-    "ageRestrictionId" integer not null,
-    CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId"),
-CONSTRAINT "mediaType_fk" FOREIGN KEY ("mediaTypeId") REFERENCES public."mediaType"("mediaTypeId"),
-CONSTRAINT "ageRestriction_fk" FOREIGN KEY ("ageRestrictionId") REFERENCES public."ageRestriction"("ageRestrictionId")
+    "mediaType" varchar(10) not null,
+    "ageRestriction" integer not null,
+    CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId")
 );
 
 create table "mediaGenre"
