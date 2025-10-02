@@ -40,14 +40,14 @@ create table media
     "mediaId" serial not null
         constraint media_pk
             primary key,
-    "userId" integer not null,
+    "creatorId" integer not null,
     title varchar(255) not null,
     description varchar(255) not null,
-    "releaseYear" integer not null,
-    "averageScore" decimal(1,2) not null,
+    "releaseYear" date not null,
+    "averageScore" numeric not null,
     "mediaType" varchar(10) not null,
     "ageRestriction" integer not null,
-    CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId")
+    CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId")  on delete cascade
 );
 
 create table "mediaGenre"
@@ -56,8 +56,8 @@ create table "mediaGenre"
         "mediaId" integer not null,
     constraint "mediaGenre_pk"
         primary key ("genreId", "mediaId"),
-    CONSTRAINT "media_fk" FOREIGN KEY ("mediaId") REFERENCES public."media"("mediaId"),
-    CONSTRAINT "genre_fk" FOREIGN KEY ("genreId") REFERENCES public."genre"("genreId")
+    CONSTRAINT "media_fk" FOREIGN KEY ("mediaId") REFERENCES public."media"("mediaId") on delete cascade,
+    CONSTRAINT "genre_fk" FOREIGN KEY ("genreId") REFERENCES public."genre"("genreId") on delete cascade
 );
 
 create table rating
@@ -71,8 +71,8 @@ create table rating
     "createdAt" timestamp without time zone not null,
     constraint "rating_pk"
         primary key ("ratingId"),
-    CONSTRAINT "media_fk" FOREIGN KEY ("mediaId") REFERENCES public."media"("mediaId"),
-    CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId"),
+    CONSTRAINT "media_fk" FOREIGN KEY ("mediaId") REFERENCES public."media"("mediaId") on delete cascade,
+    CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId") on delete cascade,
     UNIQUE("mediaId","userId")
 );
 
@@ -82,8 +82,8 @@ create table favorites
     "userId" integer not null,
     constraint favorites_pk
         primary key ("mediaId", "userId"),
-            CONSTRAINT "media_fk" FOREIGN KEY ("mediaId") REFERENCES public."media"("mediaId"),
-    CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId")
+            CONSTRAINT "media_fk" FOREIGN KEY ("mediaId") REFERENCES public."media"("mediaId") on delete cascade,
+    CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId") on delete cascade
 );
 
 create table ratingLikes
@@ -92,6 +92,6 @@ create table ratingLikes
     "userId" integer not null,
     constraint "ratingLikes_pk"
         primary key ("ratingId", "userId"),
-            CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId"),
-    CONSTRAINT "rating_fk" FOREIGN KEY ("ratingId") REFERENCES public."rating"("ratingId")
+            CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId") on delete cascade,
+    CONSTRAINT "rating_fk" FOREIGN KEY ("ratingId") REFERENCES public."rating"("ratingId") on delete cascade
 );

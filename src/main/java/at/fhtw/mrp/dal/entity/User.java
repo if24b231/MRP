@@ -1,26 +1,21 @@
 package at.fhtw.mrp.dal.entity;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+
+@Getter
 public class User {
     private final Integer userId;
+    @Setter @NonNull
     private String username;
+    @Setter @NonNull
     private String password;
 
-    public User(Integer userId, String username, String password) {
+    public User(@NonNull Integer userId, @NonNull String username, @NonNull String password) {
         this.userId = userId;
         this.username = username;
         this.password = password;
     }
-
-    public Integer getUserId() { return userId; }
-    public String getUsername() {
-        return username;
-    }
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    public String getPassword() {
-        return password;
-    }
-    public void setPassword(String password) { this.password = password; }
 }
 
