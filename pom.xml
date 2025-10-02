@@ -15,18 +15,12 @@
         <jackson.version.core>2.20.0</jackson.version.core>
         <jackson.version.annotations>2.20</jackson.version.annotations>
         <jackson.version.databind>2.20.0</jackson.version.databind>
-        <reflections.version>0.10.2</reflections.version>
         <jwt.version>4.5.0</jwt.version>
         <jdbc.version>42.7.8</jdbc.version>
         <lombok.version>1.18.42</lombok.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>${reflections.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
