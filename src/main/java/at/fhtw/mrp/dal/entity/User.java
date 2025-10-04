@@ -1,5 +1,6 @@
 package at.fhtw.mrp.dal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -9,7 +10,7 @@ public class User {
     private final Integer userId;
     @Setter @NonNull
     private String username;
-    @Setter @NonNull
+    @Setter @NonNull @JsonIgnore
     private String password;
 
     public User(@NonNull Integer userId, @NonNull String username, @NonNull String password) {

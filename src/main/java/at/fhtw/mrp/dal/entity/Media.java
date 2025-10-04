@@ -26,7 +26,7 @@ public class Media {
     @Setter
     private ArrayList<Genre> genre;
 
-    public Media(Integer mediaId, Integer creatorId, String title, String description, Date releaseYear, BigDecimal averageScore, String mediaType, Integer ageRestriction) {
+    public Media(Integer mediaId, Integer creatorId, String title, String description, Date releaseYear, BigDecimal averageScore, String mediaType, Integer ageRestriction,  ArrayList<Genre> genre) {
         this.mediaId = mediaId;
         this.creatorId = creatorId;
         this.title = title;
@@ -35,5 +35,6 @@ public class Media {
         this.averageScore = averageScore;
         this.mediaType = mediaType;
         this.ageRestriction = ageRestriction;
+        this.genre = genre;
     }
 }

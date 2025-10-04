@@ -3,6 +3,7 @@ package at.fhtw.restserver.server;
 import at.fhtw.Logging.LogType;
 import at.fhtw.Logging.Logger;
 import at.fhtw.mrp.annotations.Controller;
+import at.fhtw.mrp.model.UserCreationDto;
 import at.fhtw.mrp.service.RestService;
 import at.fhtw.mrp.utils.ControllerProcessor;
 import at.fhtw.mrp.utils.Mapping;
@@ -21,7 +22,7 @@ import java.util.function.Consumer;
 
 public class Server {
     public static final Map<Mapping, Consumer<Request>> controllers = new HashMap<>();
-    public static TokenManager tokenManager = new TokenManager(new TokenStore());
+    public static TokenManager tokenManager = TokenManager.INSTANCE.getInstance();
 
     public void start(Integer port) throws IOException {
         try {

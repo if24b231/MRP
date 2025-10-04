@@ -2,18 +2,29 @@ package at.fhtw.restserver.server.tokenManagement;
 
 import java.util.ArrayList;
 
-public class TokenStore {
-    private static final ArrayList<String> tokens = new ArrayList<>();
+public enum TokenStore {
+    INSTANCE(new ArrayList<>());
 
-    public void createEntry(String token) {
+    private final ArrayList<Token> tokens;
+
+    TokenStore(ArrayList<Token> tokens) {
+        this.tokens = tokens;
+    }
+
+    public TokenStore getInstance() {
+        return INSTANCE;
+    }
+
+    public void createEntry(Token token) {
         tokens.add(token);
     }
 
-    public String getToken(String token) {
-        return tokens.stream().filter(t -> t.equals(token)).findFirst().orElse(null);
+    public Token getToken(String tokenString) {
+        return tokens.stream().filter(t -> t.tokenString.equals(tokenString)).findFirst().orElse(null);
     }
 
-    public void removeEntry(String token) {
+    public void removeEntry(String tokenString) {
+        Token token = getToken(tokenString);
         tokens.remove(token);
     }
 }

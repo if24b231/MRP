@@ -1,83 +1,61 @@
 package at.fhtw.restserver.server.tokenManagement;
 
 import at.fhtw.mrp.dal.entity.User;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import java.time.Instant;
-import java.util.Date;
 
-public class TokenManager {
-    private static final Algorithm algorithm = Algorithm.HMAC256("your-secret-key".getBytes());
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Base64;
+
+public enum TokenManager {
+    INSTANCE(TokenStore.INSTANCE.getInstance());
     private final TokenStore tokenStore;
 
-    public TokenManager(TokenStore tokenStore) {
+    TokenManager(TokenStore tokenStore) {
         this.tokenStore = tokenStore;
     }
 
+    public TokenManager getInstance() {return INSTANCE;}
+
     public String createToken(User user) {
-        String token = generateJWT(user);
+        String tokenString = generateJWT(user);
+        Token token = new Token(tokenString, LocalDateTime.now(), LocalDateTime.now());
         this.tokenStore.createEntry(token);
-        return token;
+        return token.tokenString;
     }
 
-    public void terminateToken(String token) {
-        this.tokenStore.removeEntry(token);
+    public void terminateToken(String tokenString) {
+        this.tokenStore.removeEntry(tokenString);
     }
 
-    public String getToken(String token) {
-        return this.tokenStore.getToken(token);
+    public Token getToken(String tokenString) {
+        return this.tokenStore.getToken(tokenString);
     }
 
-    public Claim getAllClaimsFromToken(String token) {
-
-        return (Claim) getDecodedJWT(token);
+    public Integer getCurrentUserId(String tokenString) {
+        byte[] decodedBytes = Base64.getDecoder().decode(tokenString);
+        return Integer.parseInt(new String(decodedBytes, StandardCharsets.UTF_8).split("_")[0]);
     }
 
     private static String generateJWT(User user) {
-        try {
-
-            return JWT.create()
-                    .withClaim("userId", user.getUserId())
-                    .withClaim("username", user.getUsername())
-                    .withIssuedAt(Date.from(Instant.now()))
-                    .withExpiresAt(Date.from(Instant.now().plusSeconds(15 * 60)))
-                    .sign(algorithm);
-        } catch (JWTCreationException exception) {
-            return null;
-        }
+            String token = user.getUserId() + "_" + user.getUsername() + "_" + Instant.now();
+            Base64.Encoder encoder = Base64.getEncoder();
+            return encoder.encodeToString(token.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static DecodedJWT getDecodedJWT(String token) {
-        try {
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .acceptLeeway(1) //sec for nbf and iat
-                    .acceptExpiresAt(5) //before expires at
-                    .withIssuer("auth0")
-                    .build();
+    public Boolean isVerified(String tokenString) {
+        LocalDateTime now = LocalDateTime.now();
+        Token token = getToken(tokenString);
 
-            return verifier.verify(token);
-        } catch (JWTVerificationException exception){
-            throw new JWTVerificationException(exception.getMessage());
+        if (token == null) {
+            return false;
         }
-    }
 
-    public Boolean isVarified(String token) {
-        try {
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .acceptLeeway(1) //sec for nbf and iat
-                    .acceptExpiresAt(5) //before expires at
-                    .withIssuer("auth0")
-                    .build();
-
-            verifier.verify(token);
+        if(token.lastVerified.isBefore(now.plusMinutes(15))) {
+            token.lastVerified = LocalDateTime.now();
             return true;
-        } catch (JWTVerificationException exception){
-            throw new JWTVerificationException(exception.getMessage());
         }
+
+        return false;
     }
 }

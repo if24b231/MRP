@@ -5,6 +5,8 @@ import at.fhtw.restserver.http.HttpStatus;
 import at.fhtw.restserver.server.Request;
 import at.fhtw.restserver.server.Response;
 import at.fhtw.restserver.server.Server;
+import at.fhtw.restserver.server.tokenManagement.Token;
+import at.fhtw.restserver.server.tokenManagement.TokenManager;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -15,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static at.fhtw.restserver.server.Server.tokenManager;
 
 public class RestService implements HttpHandler {
     String restPattern = ":([A-Za-z0-9]+)";
@@ -34,7 +34,10 @@ public class RestService implements HttpHandler {
                             entry.getKey().methodType().toString().equalsIgnoreCase(method) && matchesPath(entry.getKey().path(), path))
                     .map(entry -> {
                         if (entry.getKey().authenticationNeeded()) {
-                            if (!tokenManager.isVarified(exchange.getRequestHeaders().getFirst("Authorization"))) {
+                            if (!TokenManager.INSTANCE.getInstance()
+                                    .isVerified(
+                                            exchange.getRequestHeaders().getFirst("Authorization").split(" ")[1]
+                                    )) {
                                 new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"message\": \"Unauthorized\"}").send(exchange);
                                 return -1;
                             }
