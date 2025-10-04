@@ -62,7 +62,7 @@ public class AuthController {
 
             if (isCorrect) {
                 new Response(HttpStatus.OK, ContentType.JSON,
-                        String.format("{\"message\": \"Login successful\", \"token\": %s}", Server.tokenManager.createToken(user)))
+                        String.format("{\"message\": \"Login successful\", \"token\": \"%s\"}", Server.tokenManager.createToken(user)))
                         .send(request.getExchange());
                 return;
             }

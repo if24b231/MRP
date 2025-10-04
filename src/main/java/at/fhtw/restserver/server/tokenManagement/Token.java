@@ -1,0 +1,14 @@
+package at.fhtw.restserver.server.tokenManagement;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Getter @Setter @AllArgsConstructor
+public class Token {
+    String tokenString;
+    LocalDateTime createdAt;
+    LocalDateTime lastVerified;
+}
