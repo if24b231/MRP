@@ -44,10 +44,10 @@ create table media
     title varchar(255) not null,
     description varchar(255) not null,
     "releaseYear" date not null,
-    "averageScore" numeric not null,
+    "averageScore" float not null,
     "mediaType" varchar(10) not null,
     "ageRestriction" integer not null,
-    CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId")  on delete cascade
+    CONSTRAINT "user_fk" FOREIGN KEY ("creatorId") REFERENCES public."user"("userId") on delete cascade
 );
 
 create table "mediaGenre"
@@ -95,3 +95,10 @@ create table ratingLikes
             CONSTRAINT "user_fk" FOREIGN KEY ("userId") REFERENCES public."user"("userId") on delete cascade,
     CONSTRAINT "rating_fk" FOREIGN KEY ("ratingId") REFERENCES public."rating"("ratingId") on delete cascade
 );
+
+insert into genre (name) values ('action'),
+                                ('sci-fi'),
+                                ('thriller'),
+                                ('horror'),
+                                ('comedy'),
+                                ('fantasy');

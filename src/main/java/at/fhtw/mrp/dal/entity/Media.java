@@ -18,7 +18,7 @@ public class Media {
     @Setter
     private Date releaseYear;
     @Setter
-    private BigDecimal averageScore;
+    private Float averageScore;
     @Setter
     private String mediaType;
     @Setter
@@ -26,7 +26,7 @@ public class Media {
     @Setter
     private ArrayList<Genre> genre;
 
-    public Media(Integer mediaId, Integer creatorId, String title, String description, Date releaseYear, BigDecimal averageScore, String mediaType, Integer ageRestriction,  ArrayList<Genre> genre) {
+    public Media(Integer mediaId, Integer creatorId, String title, String description, Date releaseYear, Float averageScore, String mediaType, Integer ageRestriction,  ArrayList<Genre> genre) {
         this.mediaId = mediaId;
         this.creatorId = creatorId;
         this.title = title;

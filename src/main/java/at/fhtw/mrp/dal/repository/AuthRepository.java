@@ -5,9 +5,6 @@ import at.fhtw.mrp.dal.entity.User;
 import at.fhtw.mrp.dal.exceptions.UserAlreadyExistsException;
 import at.fhtw.mrp.model.UserCreationDto;
 import at.fhtw.mrp.utils.PasswordHashManager;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class AuthRepository implements AutoCloseable {
-    private UnitOfWork unitOfWork;
+    private final UnitOfWork unitOfWork;
     private PasswordHashManager passwordHashManager;
 
     public AuthRepository(UnitOfWork unitOfWork) {
@@ -35,19 +32,14 @@ public class AuthRepository implements AutoCloseable {
             preparedStatement.setString(2, user.getPassword());
 
             int result = preparedStatement.executeUpdate();
-            if (result == 1) {
-                unitOfWork.commitTransaction();
-                unitOfWork.finishWork();
-                return true;
-            }
-
-            unitOfWork.rollbackTransaction();
+            unitOfWork.commitTransaction();
             unitOfWork.finishWork();
-            return false;
+
+            return result == 1;
         }
     }
 
-    public User getUser(String username) throws SQLException {
+    public User getUser(String username) {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("SELECT * FROM \"user\" WHERE username = ?")) {
             preparedStatement.setString(1, username);
 
@@ -62,16 +54,24 @@ public class AuthRepository implements AutoCloseable {
                 userRows.add(user);
             }
 
+            unitOfWork.commitTransaction();
+            unitOfWork.finishWork();
+
             if (userRows.isEmpty()) {
                 return null;
             }
 
             return userRows.stream().findFirst().orElse(null);
+        } catch (SQLException e) {
+            this.unitOfWork.rollbackTransaction();
+            unitOfWork.finishWork();
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public void close() throws Exception {
-
+        this.unitOfWork.rollbackTransaction();
+        this.unitOfWork.close();
     }
 }

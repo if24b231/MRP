@@ -33,17 +33,18 @@ public class RestService implements HttpHandler {
                     .filter(entry ->
                             entry.getKey().methodType().toString().equalsIgnoreCase(method) && matchesPath(entry.getKey().path(), path))
                     .map(entry -> {
+                        Integer userId = null;
                         if (entry.getKey().authenticationNeeded()) {
-                            if (!TokenManager.INSTANCE.getInstance()
-                                    .isVerified(
-                                            exchange.getRequestHeaders().getFirst("Authorization").split(" ")[1]
-                                    )) {
+                            String tokenString = exchange.getRequestHeaders().getFirst("Authorization").split(" ")[1];
+
+                            if (!TokenManager.INSTANCE.getInstance().isVerified(tokenString)) {
                                 new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"message\": \"Unauthorized\"}").send(exchange);
                                 return -1;
                             }
+                            userId = TokenManager.INSTANCE.getInstance().getCurrentUserId(tokenString);
                         }
                         var wildcards = extractWildcards(entry.getKey().path(), path);
-                        entry.getValue().accept(new Request(exchange, path, queryParameters, wildcards, body));
+                        entry.getValue().accept(new Request(exchange, path, queryParameters, wildcards, body, userId));
                         return 0;
                     }).findAny();
             if (result.isEmpty()) {
