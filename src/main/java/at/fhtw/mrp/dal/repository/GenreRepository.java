@@ -64,4 +64,37 @@ public class GenreRepository implements AutoCloseable {
         this.unitOfWork.rollbackTransaction();
         this.unitOfWork.close();
     }
+
+    public ArrayList<Genre> getGenresOfMedia(Integer mediaId) {
+        if(mediaId == null) {
+            return null;
+        }
+
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("SELECT * FROM \"mediaGenre\" WHERE mediaId = ?")) {
+            preparedStatement.setInt(1, mediaId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            ArrayList<Genre> genreRows = new ArrayList<>();
+            while(resultSet.next()) {
+                Genre genre = new Genre(
+                        resultSet.getInt(1),
+                        resultSet.getString(2));
+                genreRows.add(genre);
+            }
+
+            unitOfWork.commitTransaction();
+            unitOfWork.finishWork();
+
+            if (genreRows.isEmpty()) {
+                return null;
+            }
+
+            return genreRows;
+        } catch (SQLException e) {
+            this.unitOfWork.rollbackTransaction();
+            unitOfWork.finishWork();
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -1,7 +1,10 @@
 package at.fhtw.mrp.dal.repository;
 
 import at.fhtw.mrp.dal.UnitOfWork;
+import at.fhtw.mrp.dal.entity.Genre;
 import at.fhtw.mrp.dal.entity.Media;
+import at.fhtw.mrp.dal.exceptions.ForbiddenException;
+import at.fhtw.mrp.dal.exceptions.NotFoundException;
 import at.fhtw.mrp.model.MediaCreationDto;
 
 import java.sql.Date;
@@ -61,10 +64,76 @@ public class MediaRepository implements AutoCloseable {
     }
 
     public Media getMedia(Integer mediaId) {
-        //Get Genres from media from GenreRepo
-        //return Media Object
+        ArrayList<Genre> genresOfMedia = null;
+        try(GenreRepository genreRepository = new GenreRepository(new UnitOfWork())) {
+            genresOfMedia = genreRepository.getGenresOfMedia(mediaId);
+        } catch (Exception e) {
+            unitOfWork.rollbackTransaction();
+            unitOfWork.finishWork();
+            throw new RuntimeException(e);
+        }
+
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("SELECT * FROM \"media\" WHERE mediaId = ?")) {
+            preparedStatement.setInt(1, mediaId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            ArrayList<Media> mediaRows = new ArrayList<>();
+            while(resultSet.next()) {
+                Media media = new Media(
+                        resultSet.getInt(1),
+                        resultSet.getInt(2),
+                        resultSet.getString(3),
+                        resultSet.getString(4),
+                        resultSet.getDate(5),
+                        resultSet.getFloat(6),
+                        resultSet.getString(7),
+                        resultSet.getInt(8),
+                        genresOfMedia
+                );
+                mediaRows.add(media);
+            }
+
+            unitOfWork.commitTransaction();
+            unitOfWork.finishWork();
+
+            if (mediaRows.isEmpty()) {
+                throw new NotFoundException("Media not found");
+            }
+
+            return mediaRows.getFirst();
+        } catch (SQLException e) {
+            this.unitOfWork.rollbackTransaction();
+            unitOfWork.finishWork();
+            throw new RuntimeException(e);
+        }
     }
 
+    public void deleteMedia(Integer mediaId, Integer creatorId) {
+        Media mediaToDelete = getMedia(mediaId);
+        if(mediaToDelete == null) {
+            throw new NotFoundException("Media not found");
+        }
+
+        if(!mediaToDelete.getCreatorId().equals(creatorId)) {
+            throw new ForbiddenException("User is not the Creator of this media");
+        }
+
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("DELETE FROM \"media\" WHERE mediaId = ?")) {
+            preparedStatement.setInt(1, mediaId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next()) {
+                unitOfWork.commitTransaction();
+                unitOfWork.finishWork();
+            }
+        } catch (SQLException e) {
+            this.unitOfWork.rollbackTransaction();
+            unitOfWork.finishWork();
+            throw new RuntimeException(e);
+        }
+    }
 
     private Integer addGenreRelations(Integer mediaId, ArrayList<Integer> genreIds) {
         StringBuilder sqlStatement = new StringBuilder("insert into mediaGenre (genreId, mediaId) values ");
