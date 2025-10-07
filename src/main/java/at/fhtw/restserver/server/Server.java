@@ -22,7 +22,6 @@ import java.util.function.Consumer;
 
 public class Server {
     public static final Map<Mapping, Consumer<Request>> controllers = new HashMap<>();
-    public static TokenManager tokenManager = TokenManager.INSTANCE.getInstance();
 
     public void start(Integer port) throws IOException {
         try {

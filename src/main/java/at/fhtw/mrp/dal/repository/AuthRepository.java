@@ -32,10 +32,15 @@ public class AuthRepository implements AutoCloseable {
             preparedStatement.setString(2, user.getPassword());
 
             int result = preparedStatement.executeUpdate();
-            unitOfWork.commitTransaction();
-            unitOfWork.finishWork();
+            if (result == 1) {
+                unitOfWork.commitTransaction();
+                unitOfWork.finishWork();
+                return true;
+            }
 
-            return result == 1;
+            unitOfWork.rollbackTransaction();
+            unitOfWork.finishWork();
+            return false;
         }
     }
 
@@ -54,9 +59,6 @@ public class AuthRepository implements AutoCloseable {
                 userRows.add(user);
             }
 
-            unitOfWork.commitTransaction();
-            unitOfWork.finishWork();
-
             if (userRows.isEmpty()) {
                 return null;
             }
@@ -71,7 +73,6 @@ public class AuthRepository implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        this.unitOfWork.rollbackTransaction();
-        this.unitOfWork.close();
+        this.unitOfWork.finishWork();
     }
 }

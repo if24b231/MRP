@@ -2,14 +2,11 @@ package at.fhtw.mrp.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 
 @Getter @Setter
 public class MediaCreationDto {
@@ -22,7 +19,7 @@ public class MediaCreationDto {
     @JsonAlias({"releaseYear"})
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     @NonNull
-    private Date releaseYear;
+    private Integer releaseYear;
     @JsonAlias({"mediaType"})
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     @NonNull

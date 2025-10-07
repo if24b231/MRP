@@ -11,10 +11,6 @@ public enum TokenStore {
         this.tokens = tokens;
     }
 
-    public TokenStore getInstance() {
-        return INSTANCE;
-    }
-
     public void createEntry(Token token) {
         tokens.add(token);
     }

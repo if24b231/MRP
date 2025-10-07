@@ -15,6 +15,7 @@ import at.fhtw.restserver.http.Method;
 import at.fhtw.restserver.server.Request;
 import at.fhtw.restserver.server.Response;
 import at.fhtw.restserver.server.Server;
+import at.fhtw.restserver.server.tokenManagement.TokenManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AuthController {
@@ -31,7 +32,7 @@ public class AuthController {
             userCreationDto.hashPassword();
 
             if (authRepository.createUser(userCreationDto)) {
-                new Response(HttpStatus.CREATED, ContentType.JSON, "User registered").send(request.getExchange());
+                new Response(HttpStatus.CREATED, ContentType.JSON, null).send(request.getExchange());
             }
         } catch (UserAlreadyExistsException e) {
             new Response(HttpStatus.CONFLICT, ContentType.JSON, e.getMessage()).send(request.getExchange());
@@ -62,7 +63,7 @@ public class AuthController {
 
             if (isCorrect) {
                 new Response(HttpStatus.OK, ContentType.JSON,
-                        String.format("{\"message\": \"Login successful\", \"token\": \"%s\"}", Server.tokenManager.createToken(user)))
+                        String.format("{\"message\": \"Login successful\", \"token\": \"%s\"}", TokenManager.INSTANCE.createToken(user)))
                         .send(request.getExchange());
                 return;
             }

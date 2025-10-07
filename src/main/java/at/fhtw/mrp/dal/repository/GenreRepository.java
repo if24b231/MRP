@@ -1,5 +1,7 @@
 package at.fhtw.mrp.dal.repository;
 
+import at.fhtw.Logging.LogType;
+import at.fhtw.Logging.Logger;
 import at.fhtw.mrp.dal.UnitOfWork;
 import at.fhtw.mrp.dal.entity.Genre;
 import at.fhtw.mrp.dal.entity.User;
@@ -19,11 +21,14 @@ public class GenreRepository implements AutoCloseable {
     }
 
     public ArrayList<Integer> getGenreIds(List<String> genreNames) {
-        StringBuilder sqlStatement = new StringBuilder("SELECT genreId FROM \"genre\" WHERE name in (");
+        if (genreNames == null || genreNames.isEmpty()) {
+            return new ArrayList<>();
+        }
+        StringBuilder sqlStatement = new StringBuilder("SELECT \"genreId\" FROM \"genre\" WHERE name in (");
 
         int i = 0;
         for(String genreName : genreNames) {
-            if(genreName.length() > i + 1 ) {
+            if(genreNames.size() > i + 1 ) {
                 sqlStatement.append("?").append(",");
                 i++;
             } else {
@@ -34,14 +39,14 @@ public class GenreRepository implements AutoCloseable {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement(sqlStatement.toString())) {
 
             for(int x = 0; x < genreNames.size(); x++) {
-                preparedStatement.setString(x, genreNames.get(x));
+                preparedStatement.setString(x+1, genreNames.get(x));
             }
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            Collection<Integer> genreRows = new ArrayList<>();
+            ArrayList<Integer> genreRows = new ArrayList<>();
             while (resultSet.next()) {
-                genreRows.add(resultSet.getInt(0));
+                genreRows.add(resultSet.getInt(1));
             }
 
             unitOfWork.commitTransaction();
@@ -51,8 +56,9 @@ public class GenreRepository implements AutoCloseable {
                 return null;
             }
 
-            return new ArrayList<>(genreRows);
+            return genreRows;
         } catch (SQLException e) {
+            Logger.log(LogType.ERROR, e.getLocalizedMessage());
             unitOfWork.rollbackTransaction();
             unitOfWork.finishWork();
             return null;
@@ -70,7 +76,7 @@ public class GenreRepository implements AutoCloseable {
             return null;
         }
 
-        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("SELECT * FROM \"mediaGenre\" WHERE mediaId = ?")) {
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("SELECT \"genre\".* FROM \"genre\" inner join \"mediaGenre\" using (\"genreId\") WHERE \"mediaId\" = ?;")) {
             preparedStatement.setInt(1, mediaId);
 
             ResultSet resultSet = preparedStatement.executeQuery();

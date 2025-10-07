@@ -8,14 +8,12 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 
 public enum TokenManager {
-    INSTANCE(TokenStore.INSTANCE.getInstance());
+    INSTANCE(TokenStore.INSTANCE);
     private final TokenStore tokenStore;
 
     TokenManager(TokenStore tokenStore) {
         this.tokenStore = tokenStore;
     }
-
-    public TokenManager getInstance() {return INSTANCE;}
 
     public String createToken(User user) {
         String tokenString = generateJWT(user);

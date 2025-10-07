@@ -3,9 +3,7 @@ package at.fhtw.mrp.dal.entity;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 
 @Getter
 public class Media {
@@ -16,7 +14,7 @@ public class Media {
     @Setter
     private String description;
     @Setter
-    private Date releaseYear;
+    private Integer releaseYear;
     @Setter
     private Float averageScore;
     @Setter
@@ -26,7 +24,7 @@ public class Media {
     @Setter
     private ArrayList<Genre> genre;
 
-    public Media(Integer mediaId, Integer creatorId, String title, String description, Date releaseYear, Float averageScore, String mediaType, Integer ageRestriction,  ArrayList<Genre> genre) {
+    public Media(Integer mediaId, Integer creatorId, String title, String description, Integer releaseYear, Float averageScore, String mediaType, Integer ageRestriction,  ArrayList<Genre> genre) {
         this.mediaId = mediaId;
         this.creatorId = creatorId;
         this.title = title;

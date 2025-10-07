@@ -43,7 +43,7 @@ create table media
     "creatorId" integer not null,
     title varchar(255) not null,
     description varchar(255) not null,
-    "releaseYear" date not null,
+    "releaseYear" integer not null,
     "averageScore" float not null,
     "mediaType" varchar(10) not null,
     "ageRestriction" integer not null,

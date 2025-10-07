@@ -23,7 +23,12 @@ public class Response {
         httpExchange.getResponseHeaders().add("Content-Type", contentType);
 
         try (httpExchange) {
-            byte[] responseBody = content.getBytes(StandardCharsets.UTF_8);
+            byte[] responseBody;
+            if(this.content != null) {
+                responseBody = content.getBytes(StandardCharsets.UTF_8);
+            } else {
+                responseBody = "".getBytes(StandardCharsets.UTF_8);
+            }
             httpExchange.sendResponseHeaders(status, responseBody.length);
             httpExchange.getResponseBody().write(responseBody);
         } catch (IOException e) {

@@ -1,5 +1,7 @@
 package at.fhtw.mrp.dal.repository;
 
+import at.fhtw.Logging.LogType;
+import at.fhtw.Logging.Logger;
 import at.fhtw.mrp.dal.UnitOfWork;
 import at.fhtw.mrp.dal.entity.Genre;
 import at.fhtw.mrp.dal.entity.Media;
@@ -20,41 +22,33 @@ public class MediaRepository implements AutoCloseable {
         this.unitOfWork = unitOfWork;
     }
 
-    public Media createMedia(MediaCreationDto mediaCreationDto, Integer creatorId) {
+    public Integer createMedia(MediaCreationDto mediaCreationDto, Integer creatorId) {
         if (mediaCreationDto == null) {
             throw new NullPointerException("MediaCreationDto cannot be null");
         }
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement(
-                "INSERT INTO \"media\" (creatorId, title, description, releaseYear, averageScore, mediaType, ageRestriction) VALUES (?, ?, ?, ?, ?, ?, ?) return mediaId;"
+                "INSERT INTO \"media\" (\"creatorId\", title, description, \"releaseYear\", \"averageScore\", \"mediaType\", \"ageRestriction\") VALUES (?, ?, ?, ?, ?, ?, ?) returning \"mediaId\";"
         )) {
             preparedStatement.setInt(1, creatorId);
             preparedStatement.setString(2, mediaCreationDto.getTitle());
             preparedStatement.setString(3, mediaCreationDto.getDescription());
-            preparedStatement.setDate(4, (Date) mediaCreationDto.getReleaseYear());
+            preparedStatement.setInt(4, mediaCreationDto.getReleaseYear());
             preparedStatement.setFloat(5, 0); //averageScore is 0 at the beginning
             preparedStatement.setString(6, mediaCreationDto.getMediaType());
             preparedStatement.setInt(7, mediaCreationDto.getAgeRestriction());
 
-            int result = preparedStatement.executeUpdate();
-            if (result >= 1) {
+            ResultSet result = preparedStatement.executeQuery();
+            if (result.next()) {
                 ArrayList<Integer> genreIds = null;
                 try (GenreRepository genreRepository = new GenreRepository(new UnitOfWork())) {
                    genreIds = genreRepository.getGenreIds(mediaCreationDto.getGenres());
                 }
 
-                if (genreIds != null) {
-                    Integer genreMediaInsertCount = addGenreRelations(result, genreIds);
-                    if (genreMediaInsertCount == genreIds.size()) {
-                        unitOfWork.commitTransaction();
-                        unitOfWork.finishWork();
-                    }
-                }
-
-                return getMedia(result);
+                addGenreRelations(result.getInt(1), genreIds);
+                this.unitOfWork.commitTransaction();
+                this.unitOfWork.finishWork();
+                return result.getInt(1);
             }
-
-            unitOfWork.rollbackTransaction();
-            unitOfWork.finishWork();
         } catch (Exception e) {
             unitOfWork.rollbackTransaction();
             unitOfWork.finishWork();
@@ -73,7 +67,7 @@ public class MediaRepository implements AutoCloseable {
             throw new RuntimeException(e);
         }
 
-        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("SELECT * FROM \"media\" WHERE mediaId = ?")) {
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("SELECT * FROM \"media\" WHERE \"mediaId\" = ?;")) {
             preparedStatement.setInt(1, mediaId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -85,7 +79,7 @@ public class MediaRepository implements AutoCloseable {
                         resultSet.getInt(2),
                         resultSet.getString(3),
                         resultSet.getString(4),
-                        resultSet.getDate(5),
+                        resultSet.getInt(5),
                         resultSet.getFloat(6),
                         resultSet.getString(7),
                         resultSet.getInt(8),
@@ -119,7 +113,7 @@ public class MediaRepository implements AutoCloseable {
             throw new ForbiddenException("User is not the Creator of this media");
         }
 
-        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("DELETE FROM \"media\" WHERE mediaId = ?")) {
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("DELETE FROM \"media\" WHERE mediaId = ?;")) {
             preparedStatement.setInt(1, mediaId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -135,8 +129,8 @@ public class MediaRepository implements AutoCloseable {
         }
     }
 
-    private Integer addGenreRelations(Integer mediaId, ArrayList<Integer> genreIds) {
-        StringBuilder sqlStatement = new StringBuilder("insert into mediaGenre (genreId, mediaId) values ");
+    private void addGenreRelations(Integer mediaId, ArrayList<Integer> genreIds) {
+        StringBuilder sqlStatement = new StringBuilder("insert into \"mediaGenre\" (\"mediaId\", \"genreId\") values ");
 
         int i = 0;
         for(Integer genreId : genreIds) {
@@ -150,23 +144,16 @@ public class MediaRepository implements AutoCloseable {
 
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement(sqlStatement.toString())) {
 
-            int y = 0;
+            int y = 1;
             for(int x = 0; x < genreIds.size(); x++) {
-                if(x == 0) {
-                    preparedStatement.setInt(y, mediaId);
-                    preparedStatement.setInt(y + 1, genreIds.get(x));
-                }
+                preparedStatement.setInt(y, mediaId);
+                preparedStatement.setInt(y + 1, genreIds.get(x));
                 y = y + 2;
             }
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            int size = 0;
-            while (resultSet.next()) {
-                size++;
-            }
-            return size;
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
+            Logger.log(LogType.ERROR, e.getLocalizedMessage());
             this.unitOfWork.rollbackTransaction();
             unitOfWork.finishWork();
             throw new RuntimeException(e);
@@ -175,7 +162,6 @@ public class MediaRepository implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        this.unitOfWork.rollbackTransaction();
-        this.unitOfWork.close();
+        this.unitOfWork.finishWork();
     }
 }

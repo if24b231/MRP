@@ -25,11 +25,27 @@ public class MediaController {
             return;
         }
 
+        //Creation Process
+        Integer createdMediaId = null;
         try(MediaRepository mediaRepository = new MediaRepository(new UnitOfWork())) {
             MediaCreationDto mediaCreationDto = new ObjectMapper().readValue(body, MediaCreationDto.class);
 
-            Media createdMedia = mediaRepository.createMedia(mediaCreationDto, request.getUserId());
+            createdMediaId = mediaRepository.createMedia(mediaCreationDto, request.getUserId());
+        } catch (NullPointerException ex) {
+            new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"mediaCreationDto cannot be null.\"}").send(request.getExchange());
+        } catch (Exception e) {
+            Logger.log(LogType.ERROR, "Failed to create media: " + e.getLocalizedMessage());
+            new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"message\": \"Failed to create media.\"}").send(request.getExchange());
+        }
 
+        if(createdMediaId == null) {
+            return;
+        }
+
+        try(MediaRepository mediaRepository = new MediaRepository(new UnitOfWork())) {
+            MediaCreationDto mediaCreationDto = new ObjectMapper().readValue(body, MediaCreationDto.class);
+
+            Media createdMedia = mediaRepository.getMedia(createdMediaId);
             new Response(HttpStatus.CREATED, ContentType.JSON, new ObjectMapper().writeValueAsString(createdMedia)).send(request.getExchange());
         } catch (NullPointerException ex) {
             new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"mediaCreationDto cannot be null.\"}").send(request.getExchange());
