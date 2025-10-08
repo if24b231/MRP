@@ -1,5 +1,7 @@
 package at.fhtw.mrp.service;
 
+import at.fhtw.Logging.LogType;
+import at.fhtw.Logging.Logger;
 import at.fhtw.restserver.http.ContentType;
 import at.fhtw.restserver.http.HttpStatus;
 import at.fhtw.restserver.server.Request;
@@ -17,10 +19,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class RestService implements HttpHandler {
-    String restPattern = ":([A-Za-z0-9]+)";
-    String restPatternReplacement = "([^/]+)";
+    String restPattern = "/:[A-Za-z0-9]+";
+    String restPatternReplacement = "/(.+)";
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -54,32 +57,26 @@ public class RestService implements HttpHandler {
         }
 
     private boolean matchesPath(String targetPath, String requestPath) {
-        return requestPath.equals(targetPath.replaceAll(restPattern, restPatternReplacement));
+        String targetPathReplaced = targetPath.replaceAll(restPattern, restPatternReplacement);
+        return requestPath.matches(targetPathReplaced);
     }
 
     private Map<String, String> extractWildcards(String targetPath, String requestPath) {
         Map<String, String> wildcards = new HashMap<>();
 
-        //remove all Wildcards like :id from the targetPath
-        Pattern pattern = Pattern.compile(restPattern);
-        Matcher matcher = pattern.matcher(targetPath);
-        List<String> wildcardNames = new ArrayList<>();
-        while (matcher.find()) {
-            wildcardNames.add(matcher.group(1));
-        }
+        try {
+            String cleanedRequestPath = requestPath.split("\\?")[0];
 
-        //Convert targetPath to a regex pattern and match the requestPath
-        String regex = targetPath.replaceAll(restPattern, restPatternReplacement); ///api/users/([^/]+)
-        Pattern valuePattern = Pattern.compile(regex);
-        Matcher valueMatcher = valuePattern.matcher(requestPath);
+            String[] splitCleanedRequestPath = cleanedRequestPath.split("/");
+            String[] splitTargetPath = targetPath.split("/");
 
-        if (matcher.matches()) {
-            //Extract wildcard values and map them to names
-            if (wildcardNames.size() == valueMatcher.groupCount()) {
-                for (int i = 0; i < wildcardNames.size(); i++) {
-                    wildcards.put(wildcardNames.get(i), valueMatcher.group(i + 1));
+            for(int i = 0; i < splitTargetPath.length; i++) {
+                if(splitTargetPath[i].contains(":")) {
+                    wildcards.put(splitTargetPath[i].split(":")[1], splitCleanedRequestPath[i]);
                 }
             }
+        } catch (Exception ex) {
+            Logger.log(LogType.ERROR, ex.getLocalizedMessage());
         }
 
         return wildcards;

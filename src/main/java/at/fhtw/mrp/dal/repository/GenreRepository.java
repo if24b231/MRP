@@ -49,9 +49,6 @@ public class GenreRepository implements AutoCloseable {
                 genreRows.add(resultSet.getInt(1));
             }
 
-            unitOfWork.commitTransaction();
-            unitOfWork.finishWork();
-
             if (genreRows.isEmpty()) {
                 return null;
             }
@@ -63,12 +60,6 @@ public class GenreRepository implements AutoCloseable {
             unitOfWork.finishWork();
             return null;
         }
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.unitOfWork.rollbackTransaction();
-        this.unitOfWork.close();
     }
 
     public ArrayList<Genre> getGenresOfMedia(Integer mediaId) {
@@ -89,9 +80,6 @@ public class GenreRepository implements AutoCloseable {
                 genreRows.add(genre);
             }
 
-            unitOfWork.commitTransaction();
-            unitOfWork.finishWork();
-
             if (genreRows.isEmpty()) {
                 return null;
             }
@@ -103,4 +91,16 @@ public class GenreRepository implements AutoCloseable {
             throw new RuntimeException(e);
         }
     }
+
+    public void SaveChanges() {
+        this.unitOfWork.commitTransaction();
+        this.unitOfWork.finishWork();
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.unitOfWork.rollbackTransaction();
+        this.unitOfWork.close();
+    }
+
 }

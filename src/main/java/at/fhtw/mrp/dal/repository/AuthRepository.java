@@ -33,8 +33,6 @@ public class AuthRepository implements AutoCloseable {
 
             int result = preparedStatement.executeUpdate();
             if (result == 1) {
-                unitOfWork.commitTransaction();
-                unitOfWork.finishWork();
                 return true;
             }
 
@@ -69,6 +67,11 @@ public class AuthRepository implements AutoCloseable {
             unitOfWork.finishWork();
             throw new RuntimeException(e);
         }
+    }
+
+    public void SaveChanges() {
+        this.unitOfWork.commitTransaction();
+        this.unitOfWork.finishWork();
     }
 
     @Override

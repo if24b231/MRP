@@ -14,7 +14,6 @@ import at.fhtw.restserver.http.HttpStatus;
 import at.fhtw.restserver.http.Method;
 import at.fhtw.restserver.server.Request;
 import at.fhtw.restserver.server.Response;
-import at.fhtw.restserver.server.Server;
 import at.fhtw.restserver.server.tokenManagement.TokenManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,6 +31,7 @@ public class AuthController {
             userCreationDto.hashPassword();
 
             if (authRepository.createUser(userCreationDto)) {
+                authRepository.SaveChanges();
                 new Response(HttpStatus.CREATED, ContentType.JSON, null).send(request.getExchange());
             }
         } catch (UserAlreadyExistsException e) {
@@ -54,7 +54,9 @@ public class AuthController {
             UserCreationDto userCreationDto = new ObjectMapper().readValue(body, UserCreationDto.class);
 
             User user = authRepository.getUser(userCreationDto.getUsername());
+
             if (user == null) {
+                authRepository.SaveChanges();
                 new Response(HttpStatus.NOT_FOUND, ContentType.JSON, "{\"message\": \"User not found\"}").send(request.getExchange());
                 return;
             }

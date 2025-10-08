@@ -42,11 +42,10 @@ public class MediaRepository implements AutoCloseable {
                 ArrayList<Integer> genreIds = null;
                 try (GenreRepository genreRepository = new GenreRepository(new UnitOfWork())) {
                    genreIds = genreRepository.getGenreIds(mediaCreationDto.getGenres());
+                   genreRepository.SaveChanges();
                 }
 
                 addGenreRelations(result.getInt(1), genreIds);
-                this.unitOfWork.commitTransaction();
-                this.unitOfWork.finishWork();
                 return result.getInt(1);
             }
         } catch (Exception e) {
@@ -61,6 +60,7 @@ public class MediaRepository implements AutoCloseable {
         ArrayList<Genre> genresOfMedia = null;
         try(GenreRepository genreRepository = new GenreRepository(new UnitOfWork())) {
             genresOfMedia = genreRepository.getGenresOfMedia(mediaId);
+            genreRepository.SaveChanges();
         } catch (Exception e) {
             unitOfWork.rollbackTransaction();
             unitOfWork.finishWork();
@@ -88,9 +88,6 @@ public class MediaRepository implements AutoCloseable {
                 mediaRows.add(media);
             }
 
-            unitOfWork.commitTransaction();
-            unitOfWork.finishWork();
-
             if (mediaRows.isEmpty()) {
                 throw new NotFoundException("Media not found");
             }
@@ -113,15 +110,10 @@ public class MediaRepository implements AutoCloseable {
             throw new ForbiddenException("User is not the Creator of this media");
         }
 
-        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("DELETE FROM \"media\" WHERE mediaId = ?;")) {
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("DELETE FROM \"media\" WHERE \"mediaId\" = ?;")) {
             preparedStatement.setInt(1, mediaId);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if(resultSet.next()) {
-                unitOfWork.commitTransaction();
-                unitOfWork.finishWork();
-            }
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             this.unitOfWork.rollbackTransaction();
             unitOfWork.finishWork();
@@ -162,6 +154,11 @@ public class MediaRepository implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
+        this.unitOfWork.finishWork();
+    }
+
+    public void SaveChanges() {
+        this.unitOfWork.commitTransaction();
         this.unitOfWork.finishWork();
     }
 }

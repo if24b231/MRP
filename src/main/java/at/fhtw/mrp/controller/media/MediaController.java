@@ -31,6 +31,7 @@ public class MediaController {
             MediaCreationDto mediaCreationDto = new ObjectMapper().readValue(body, MediaCreationDto.class);
 
             createdMediaId = mediaRepository.createMedia(mediaCreationDto, request.getUserId());
+            mediaRepository.SaveChanges();
         } catch (NullPointerException ex) {
             new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"mediaCreationDto cannot be null.\"}").send(request.getExchange());
         } catch (Exception e) {
@@ -46,6 +47,7 @@ public class MediaController {
             MediaCreationDto mediaCreationDto = new ObjectMapper().readValue(body, MediaCreationDto.class);
 
             Media createdMedia = mediaRepository.getMedia(createdMediaId);
+            mediaRepository.SaveChanges();
             new Response(HttpStatus.CREATED, ContentType.JSON, new ObjectMapper().writeValueAsString(createdMedia)).send(request.getExchange());
         } catch (NullPointerException ex) {
             new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"mediaCreationDto cannot be null.\"}").send(request.getExchange());
@@ -58,16 +60,17 @@ public class MediaController {
     @Controller(path = "/api/media/:id", method = Method.DELETE)
     public static void delete(Request request) {
         try(MediaRepository mediaRepository = new MediaRepository(new UnitOfWork())) {
-            mediaRepository.deleteMedia(Integer.parseInt(request.getQueryParameters().get("id").getFirst()),request.getUserId());
-
+            Integer  mediaId = Integer.parseInt(request.getWildcards().get("id"));
+            mediaRepository.deleteMedia(mediaId, request.getUserId());
+            mediaRepository.SaveChanges();
             new Response(HttpStatus.OK, ContentType.JSON, null).send(request.getExchange());
         } catch(ForbiddenException ex) {
             new Response(HttpStatus.FORBIDDEN, ContentType.JSON, null).send(request.getExchange());
         } catch(NotFoundException ex) {
             new Response(HttpStatus.NOT_FOUND, ContentType.JSON, null).send(request.getExchange());
         } catch (Exception e) {
-            Logger.log(LogType.ERROR, "Failed to find media: " + e.getLocalizedMessage());
-            new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"message\": \"Failed to find media.\"}").send(request.getExchange());
+            Logger.log(LogType.ERROR, "Failed to delete media: " + e.getLocalizedMessage());
+            new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"message\": \"Failed to delete media.\"}").send(request.getExchange());
         }
 
     }
@@ -82,11 +85,13 @@ public class MediaController {
         new Response(HttpStatus.NOT_IMPLEMENTED, ContentType.JSON, "{\"message\": \"Not implemented.\"}").send(request.getExchange());
     }
 
-    @Controller(path = "/api/media/:id", method = Method.POST)
+    @Controller(path = "/api/media/:id", method = Method.GET)
     public static void getMediaById(Request request) {
         try(MediaRepository mediaRepository = new MediaRepository(new UnitOfWork())) {
-            Media foundMedia = mediaRepository.getMedia(Integer.parseInt(request.getQueryParameters().get("id").getFirst()));
+            Integer  mediaId = Integer.parseInt(request.getWildcards().get("id"));
+            Media foundMedia = mediaRepository.getMedia(mediaId);
 
+            mediaRepository.SaveChanges();
             new Response(HttpStatus.OK, ContentType.JSON, new ObjectMapper().writeValueAsString(foundMedia)).send(request.getExchange());
         } catch(NotFoundException ex) {
             new Response(HttpStatus.NOT_FOUND, ContentType.JSON, null).send(request.getExchange());
