@@ -7,8 +7,7 @@ import at.fhtw.restserver.http.HttpStatus;
 import at.fhtw.restserver.server.Request;
 import at.fhtw.restserver.server.Response;
 import at.fhtw.restserver.server.Server;
-import at.fhtw.restserver.server.tokenManagement.Token;
-import at.fhtw.restserver.server.tokenManagement.TokenManager;
+import at.fhtw.restserver.server.auth.TokenManager;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -17,9 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public class RestService implements HttpHandler {
     String restPattern = "/:[A-Za-z0-9]+";

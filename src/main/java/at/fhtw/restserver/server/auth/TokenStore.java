@@ -1,4 +1,4 @@
-package at.fhtw.restserver.server.tokenManagement;
+package at.fhtw.restserver.server.auth;
 
 import java.util.ArrayList;
 

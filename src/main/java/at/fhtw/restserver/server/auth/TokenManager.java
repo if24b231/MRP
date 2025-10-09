@@ -1,4 +1,4 @@
-package at.fhtw.restserver.server.tokenManagement;
+package at.fhtw.restserver.server.auth;
 
 import at.fhtw.mrp.dal.entity.User;
 
@@ -16,7 +16,7 @@ public enum TokenManager {
     }
 
     public String createToken(User user) {
-        String tokenString = generateJWT(user);
+        String tokenString = generateToken(user);
         Token token = new Token(tokenString, LocalDateTime.now(), LocalDateTime.now());
         this.tokenStore.createEntry(token);
         return token.tokenString;
@@ -35,7 +35,7 @@ public enum TokenManager {
         return Integer.parseInt(new String(decodedBytes, StandardCharsets.UTF_8).split("_")[0]);
     }
 
-    private static String generateJWT(User user) {
+    private static String generateToken(User user) {
             String token = user.getUserId() + "_" + user.getUsername() + "_" + Instant.now();
             Base64.Encoder encoder = Base64.getEncoder();
             return encoder.encodeToString(token.getBytes(StandardCharsets.UTF_8));

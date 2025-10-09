@@ -14,7 +14,7 @@ import at.fhtw.restserver.http.HttpStatus;
 import at.fhtw.restserver.http.Method;
 import at.fhtw.restserver.server.Request;
 import at.fhtw.restserver.server.Response;
-import at.fhtw.restserver.server.tokenManagement.TokenManager;
+import at.fhtw.restserver.server.auth.TokenManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AuthController {

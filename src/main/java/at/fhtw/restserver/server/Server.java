@@ -3,12 +3,9 @@ package at.fhtw.restserver.server;
 import at.fhtw.Logging.LogType;
 import at.fhtw.Logging.Logger;
 import at.fhtw.mrp.annotations.Controller;
-import at.fhtw.mrp.model.UserCreationDto;
 import at.fhtw.mrp.service.RestService;
 import at.fhtw.mrp.utils.ControllerProcessor;
 import at.fhtw.mrp.utils.Mapping;
-import at.fhtw.restserver.server.tokenManagement.TokenManager;
-import at.fhtw.restserver.server.tokenManagement.TokenStore;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -57,12 +54,10 @@ public class Server {
         try {
             var access = method.canAccess(null);
             if (!access) {
-                method.setAccessible(true);
+                //method.setAccessible(true);
+                throw new RuntimeException("One method is not accessible!");
             }
             method.invoke(null, request);
-            if (!access) {
-                method.setAccessible(false);
-            }
         } catch (IllegalAccessException | InvocationTargetException exception) {
             Logger.log(LogType.ERROR, String.format("%s: %s", method.getName(), exception.getLocalizedMessage()));
         }
