@@ -2,13 +2,17 @@ package at.fhtw.mrp.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.util.ArrayList;
 
 @Getter @Setter
+@Builder
+@Jacksonized
 public class MediaCreationDto {
     @NonNull
     private String title;

@@ -30,10 +30,9 @@ public class AuthController {
             UserCreationDto userCreationDto = new ObjectMapper().readValue(body, UserCreationDto.class);
             userCreationDto.hashPassword();
 
-            if (authRepository.createUser(userCreationDto)) {
-                authRepository.SaveChanges();
-                new Response(HttpStatus.CREATED, ContentType.JSON, null).send(request.getExchange());
-            }
+            authRepository.createUser(userCreationDto);
+            authRepository.SaveChanges();
+            new Response(HttpStatus.CREATED, ContentType.JSON, null).send(request.getExchange());
         } catch (UserAlreadyExistsException e) {
             new Response(HttpStatus.CONFLICT, ContentType.JSON, e.getMessage()).send(request.getExchange());
         } catch (Exception e) {

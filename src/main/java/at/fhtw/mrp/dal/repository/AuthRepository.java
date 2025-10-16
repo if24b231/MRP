@@ -1,5 +1,7 @@
 package at.fhtw.mrp.dal.repository;
 
+import at.fhtw.Logging.LogType;
+import at.fhtw.Logging.Logger;
 import at.fhtw.mrp.dal.UnitOfWork;
 import at.fhtw.mrp.dal.entity.User;
 import at.fhtw.mrp.dal.exceptions.UserAlreadyExistsException;
@@ -20,7 +22,7 @@ public class AuthRepository implements AutoCloseable {
         this.unitOfWork = unitOfWork;
     }
 
-    public Boolean createUser(UserCreationDto user) throws SQLException {
+    public void createUser(UserCreationDto user) throws SQLException {
         if (getUser(user.getUsername()) != null) {
             throw new UserAlreadyExistsException("User already exists");
         }
@@ -32,13 +34,13 @@ public class AuthRepository implements AutoCloseable {
             preparedStatement.setString(2, user.getPassword());
 
             int result = preparedStatement.executeUpdate();
-            if (result == 1) {
-                return true;
+            if (result != 1) {
+                throw new SQLException("Failed to create user");
             }
-
-            unitOfWork.rollbackTransaction();
-            unitOfWork.finishWork();
-            return false;
+        } catch (SQLException e) {
+            this.unitOfWork.rollbackTransaction();
+            this.unitOfWork.finishWork();
+            Logger.log(LogType.ERROR, e.getLocalizedMessage());
         }
     }
 

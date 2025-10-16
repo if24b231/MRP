@@ -3,26 +3,25 @@ package at.fhtw.mrp.model;
 import at.fhtw.mrp.utils.PasswordHashManager;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
+import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Objects;
 
-@AllArgsConstructor
+@Getter
+@Builder
+@Jacksonized
 public class UserCreationDto {
     @JsonAlias({"username"})
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-    @Getter @NonNull
+    @NonNull
     private String username;
     @JsonAlias({"password"})
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-    @Getter @NonNull
+    @NonNull
     private String password;
-
-    public UserCreationDto() {}
 
     public void hashPassword() throws InvalidKeySpecException, NoSuchAlgorithmException {
         PasswordHashManager passwordHashManager = new PasswordHashManager();
