@@ -9,6 +9,7 @@ import at.fhtw.mrp.dal.exceptions.ForbiddenException;
 import at.fhtw.mrp.dal.exceptions.NotFoundException;
 import at.fhtw.mrp.dal.repository.MediaRepository;
 import at.fhtw.mrp.model.MediaCreationDto;
+import at.fhtw.mrp.model.MediaUpdateDto;
 import at.fhtw.restserver.http.ContentType;
 import at.fhtw.restserver.http.HttpStatus;
 import at.fhtw.restserver.http.Method;
@@ -44,15 +45,13 @@ public class MediaController {
         }
 
         try(MediaRepository mediaRepository = new MediaRepository(new UnitOfWork())) {
-            MediaCreationDto mediaCreationDto = new ObjectMapper().readValue(body, MediaCreationDto.class);
-
             Media createdMedia = mediaRepository.getMedia(createdMediaId);
             mediaRepository.SaveChanges();
             new Response(HttpStatus.CREATED, ContentType.JSON, new ObjectMapper().writeValueAsString(createdMedia)).send(request.getExchange());
         } catch (NullPointerException ex) {
             new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"mediaCreationDto cannot be null.\"}").send(request.getExchange());
         } catch (Exception e) {
-            Logger.log(LogType.ERROR, "Failed to create media: " + e.getLocalizedMessage());
+            Logger.log(LogType.ERROR, "Failed to get media: " + e.getLocalizedMessage());
             new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"message\": \"Failed to create media.\"}").send(request.getExchange());
         }
     }
@@ -77,7 +76,39 @@ public class MediaController {
 
     @Controller(path = "/api/media/:id", method = Method.PUT)
     public static void update(Request request) {
-        new Response(HttpStatus.NOT_IMPLEMENTED, ContentType.JSON, "{\"message\": \"Not implemented.\"}").send(request.getExchange());
+        String body = request.getBody();
+        if (body == null || body.isEmpty()) {
+            new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"Body should not be empty.\"}").send(request.getExchange());
+            return;
+        }
+
+        Integer mediaId = Integer.parseInt(request.getWildcards().get("id"));
+        try(MediaRepository mediaRepository = new MediaRepository(new UnitOfWork())) {
+            MediaUpdateDto mediaUpdateDto = new ObjectMapper().readValue(body, MediaUpdateDto.class);
+
+            mediaRepository.updateMedia(mediaId, request.getUserId(),  mediaUpdateDto);
+            mediaRepository.SaveChanges();
+        } catch(ForbiddenException ex) {
+            new Response(HttpStatus.FORBIDDEN, ContentType.JSON, null).send(request.getExchange());
+        } catch(NotFoundException ex) {
+            new Response(HttpStatus.NOT_FOUND, ContentType.JSON, null).send(request.getExchange());
+        } catch (NullPointerException ex) {
+            new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"mediaUpdateDto cannot be null.\"}").send(request.getExchange());
+        } catch (Exception e) {
+            Logger.log(LogType.ERROR, "Failed to update media: " + e.getLocalizedMessage());
+            new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"message\": \"Failed to create media.\"}").send(request.getExchange());
+        }
+
+        try(MediaRepository mediaRepository = new MediaRepository(new UnitOfWork())) {
+            Media updatedMedia = mediaRepository.getMedia(mediaId);
+            mediaRepository.SaveChanges();
+            new Response(HttpStatus.OK, ContentType.JSON, new ObjectMapper().writeValueAsString(updatedMedia)).send(request.getExchange());
+        } catch (NullPointerException ex) {
+            new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"message\": \"mediaCreationDto cannot be null.\"}").send(request.getExchange());
+        } catch (Exception e) {
+            Logger.log(LogType.ERROR, "Failed to get media: " + e.getLocalizedMessage());
+            new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"message\": \"Failed to create media.\"}").send(request.getExchange());
+        }
     }
 
     @Controller(path = "/api/media", method = Method.GET)
